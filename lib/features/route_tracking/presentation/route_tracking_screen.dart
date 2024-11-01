@@ -1,3 +1,4 @@
+// Other imports...
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
@@ -14,10 +15,15 @@ class RouteTrackingScreen extends ConsumerWidget {
     final routeState = ref.watch(routeProvider);
 
     return Scaffold(
-      // appBar: AppBar(
-      //   title: const Text('Route Tracking'),
-      //   backgroundColor: Colors.black87,
-      // ),
+      extendBodyBehindAppBar: true,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        title: const Text('Route Tracking'),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back),
+          onPressed: () => Navigator.pop(context),
+        ),
+      ),
       body: FutureBuilder<Position>(
         future: ref.read(routeProvider.notifier).getCurrentPosition(),
         builder: (context, snapshot) {
@@ -29,56 +35,39 @@ class RouteTrackingScreen extends ConsumerWidget {
 
           final currentPosition = snapshot.data;
 
-          return Column(
+          return Stack(
             children: [
-              // Карта
-              Container(
-                height: MediaQuery.of(context).size.height * 0.75,
-                child: FlutterMap(
-                  options: MapOptions(
-                    crs: const Epsg3857(),
-                    initialCenter: currentPosition != null
-                        ? LatLng(
-                            currentPosition.latitude, currentPosition.longitude)
-                        : const LatLng(50.5, 30.51),
-                    initialZoom: routeState.zoomLevel,
-                    interactionOptions: const InteractionOptions(
-                      flags: InteractiveFlag.all,
-                    ),
+              FlutterMap(
+                options: MapOptions(
+                  crs: const Epsg3857(),
+                  initialCenter: currentPosition != null
+                      ? LatLng(
+                          currentPosition.latitude, currentPosition.longitude)
+                      : const LatLng(50.5, 30.51),
+                  initialZoom: routeState.zoomLevel,
+                  interactionOptions: const InteractionOptions(
+                    flags: InteractiveFlag.all,
                   ),
-                  children: [
-                    TileLayer(
-                      urlTemplate:
-                          "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-                    ),
-                    MarkerLayer(markers: _createMarkers(routeState)),
-                    PolylineLayer(polylines: _createPolylines(routeState)),
-                  ],
                 ),
+                children: [
+                  TileLayer(
+                    urlTemplate:
+                        "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                  ),
+                  MarkerLayer(markers: _createMarkers(routeState)),
+                  PolylineLayer(polylines: _createPolylines(routeState)),
+                ],
               ),
-              _buildDistanceInfo(routeState),
+              Positioned(
+                bottom: 0,
+                left: 0,
+                right: 0,
+                child: _buildDistanceInfo(context, ref, routeState),
+              ),
               Center(
                 child: routeState.start != null && routeState.end == null
                     ? _buildInProgressRoute(context, ref, routeState)
                     : _buildStartRouteButton(context, ref),
-              ),
-              // Кнопки для зума
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  IconButton(
-                    icon: const Icon(Icons.zoom_in),
-                    onPressed: () {
-                      ref.read(routeProvider.notifier).zoomIn();
-                    },
-                  ),
-                  IconButton(
-                    icon: const Icon(Icons.zoom_out),
-                    onPressed: () {
-                      ref.read(routeProvider.notifier).zoomOut();
-                    },
-                  ),
-                ],
               ),
             ],
           );
@@ -93,7 +82,7 @@ class RouteTrackingScreen extends ConsumerWidget {
     if (routeState.start != null) {
       markers.add(Marker(
         point: LatLng(routeState.start!.latitude, routeState.start!.longitude),
-        child: const Icon(Icons.circle, color: Colors.green, size: 40),
+        child: Icon(Icons.circle, color: Colors.green, size: 40),
       ));
     }
 
@@ -124,28 +113,55 @@ class RouteTrackingScreen extends ConsumerWidget {
     return polylines;
   }
 
+  Widget _buildDistanceInfo(
+      BuildContext context, WidgetRef ref, RouteModel routeState) {
+    final tokensEarned = (routeState.distance / 5).floor(); // 1 токен за 5 км
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+      decoration: const BoxDecoration(
+        color: Colors.black54,
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(30),
+          topRight: Radius.circular(30),
+        ),
+        boxShadow: [
+          BoxShadow(color: Colors.black38, spreadRadius: 0, blurRadius: 10),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const SizedBox(height: 20),
+          Text(
+            'Distance Traveled: ${routeState.distance.toStringAsFixed(2)} km\n'
+            'Tokens Earned: $tokensEarned SCT',
+            style: const TextStyle(
+                fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: () async {
+              // Обработчик для кнопки завершения маршрута
+              await ref.read(routeProvider.notifier).endRoute();
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(content: Text('Route ended')),
+              );
+            },
+            style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
+            child: const Text('End Route'),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildInProgressRoute(
       BuildContext context, WidgetRef ref, RouteModel routeState) {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
-        const Text('Route in Progress', style: TextStyle(fontSize: 20)),
-        ElevatedButton(
-          style: ElevatedButton.styleFrom(backgroundColor: Colors.green),
-          onPressed: () async {
-            await ref.read(routeProvider.notifier).endRoute();
-            final tokensEarned =
-                (routeState.distance / 5).floor().toString(); // 1 токен за 5 км
-            // ignore: use_build_context_synchronously
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content:
-                    Text('Route completed, tokens earned: $tokensEarned SCT'),
-              ),
-            );
-          },
-          child: const Text('End Route'),
-        ),
+        const Text('Route in Progress',
+            style: TextStyle(fontSize: 20, color: Colors.white)),
       ],
     );
   }
@@ -160,26 +176,12 @@ class RouteTrackingScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildDistanceInfo(RouteModel routeState) {
-    final tokensEarned = (routeState.distance / 5).floor(); // 1 токен за 5 км
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Text(
-        'Distance Traveled: ${routeState.distance.toStringAsFixed(2)} km\n'
-        'Tokens Earned: $tokensEarned SCT',
-        textAlign: TextAlign.center,
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-      ),
-    );
-  }
-
   Future<void> _checkLocationPermission(
       BuildContext context, WidgetRef ref) async {
     LocationPermission permission = await Geolocator.checkPermission();
     if (permission == LocationPermission.denied) {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
-        // ignore: use_build_context_synchronously
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Location permission denied.')),
         );
@@ -188,7 +190,6 @@ class RouteTrackingScreen extends ConsumerWidget {
     }
 
     if (permission == LocationPermission.deniedForever) {
-      // ignore: use_build_context_synchronously
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
             content: Text('Location permission permanently denied.')),
@@ -198,7 +199,6 @@ class RouteTrackingScreen extends ConsumerWidget {
     }
 
     await ref.read(routeProvider.notifier).startRoute();
-    // ignore: use_build_context_synchronously
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Route started')),
     );
