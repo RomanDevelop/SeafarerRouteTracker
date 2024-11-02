@@ -59,13 +59,38 @@ class BusinessProfileCardEdit extends StatelessWidget {
               },
               child: const MoreCard(
                 title: 'Buy New NFTs',
-                tokenAmount: '10 SCT',
+                tokenAmount: '3.0 SCT',
               ),
             ),
             const SizedBox(height: 10),
-            const MoreCard(
-              title: 'Sell Your NFTs',
-              tokenAmount: '20 SCT',
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const BuyNewNFTsScreen(),
+                  ),
+                );
+              },
+              child: const MoreCard(
+                title: 'Sell Your NFTs',
+                tokenAmount: '5.0 SCT',
+              ),
+            ),
+            const SizedBox(height: 10),
+            GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const BuyNewNFTsScreen(),
+                  ),
+                );
+              },
+              child: const MoreCard(
+                title: 'Exchange & Withdrawals',
+                tokenAmount: '100.0 SCT',
+              ),
             ),
           ],
         ),

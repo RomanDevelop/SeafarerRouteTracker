@@ -2,13 +2,13 @@ import 'package:flutter/material.dart';
 
 class TicketCardSlider extends StatelessWidget {
   const TicketCardSlider({super.key, required this.imageUrls});
-  final List<String> imageUrls; // Изменено на List<String>
+  final List<String> imageUrls;
 
   @override
   Widget build(BuildContext context) {
     return ShaderMask(
       shaderCallback: (Rect rect) {
-        return LinearGradient(
+        return const LinearGradient(
           begin: Alignment.centerLeft,
           end: Alignment.centerRight,
           colors: [
@@ -17,7 +17,7 @@ class TicketCardSlider extends StatelessWidget {
             Colors.transparent,
             Colors.grey,
           ],
-          stops: const [0.0, 0.1, 0.9, 1.0],
+          stops: [0.0, 0.1, 0.9, 1.0],
         ).createShader(rect);
       },
       blendMode: BlendMode.dstOut,
@@ -26,8 +26,7 @@ class TicketCardSlider extends StatelessWidget {
         child: ListView.builder(
           padding: const EdgeInsets.symmetric(horizontal: 30),
           scrollDirection: Axis.horizontal,
-          itemCount:
-              imageUrls.length, // Используем количество переданных изображений
+          itemCount: imageUrls.length,
           itemBuilder: (context, index) {
             return Padding(
               padding: const EdgeInsets.symmetric(horizontal: 10),
@@ -46,7 +45,7 @@ class TicketCardSlider extends StatelessWidget {
                           top: Radius.circular(20),
                         ),
                         child: Image.network(
-                          imageUrls[index], // Используем URL из списка
+                          imageUrls[index],
                           height: 120,
                           width: double.infinity,
                           fit: BoxFit.cover,
@@ -57,19 +56,19 @@ class TicketCardSlider extends StatelessWidget {
                         child: Column(
                           children: [
                             Text(
-                              'Full Name',
+                              'NFT Ship',
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
                               ),
                             ),
                             SizedBox(height: 4),
-                            Text(
-                              'name@gmail.com',
-                              style: TextStyle(
-                                color: Colors.grey,
-                                fontSize: 12,
-                              ),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                Icon(Icons.monetization_on, size: 16),
+                                Text(' 57.0 SCT')
+                              ],
                             ),
                           ],
                         ),

@@ -39,6 +39,7 @@ dependencies:
   geolocator: ^10.0.3
   flutter_map: ^7.0.2
   latlong2: ^0.9.1
+  fluttertoast: ^8.0.9
   
 
 dev_dependencies:

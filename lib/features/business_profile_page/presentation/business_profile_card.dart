@@ -14,7 +14,7 @@ class BusinessProfileCard extends StatelessWidget {
         Navigator.push(
           context,
           MaterialPageRoute(
-            builder: (context) => BusinessProfileCardEdit(),
+            builder: (context) => const BusinessProfileCardEdit(),
           ),
         );
       },

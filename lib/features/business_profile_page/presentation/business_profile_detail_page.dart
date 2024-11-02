@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:route_tracking/features/business_profile_page/presentation/more_card.dart';
-import 'package:route_tracking/features/business_profile_page/presentation/ship_card.dart';
+import 'package:route_tracking/features/business_profile_page/presentation/business_profile_card.dart';
 import 'package:route_tracking/features/business_profile_page/presentation/ship_model.dart';
 import 'package:route_tracking/features/route_tracking/presentation/route_tracking_screen.dart';
 
@@ -44,6 +44,56 @@ class _BusinessProfileDetailsPageState extends State<BusinessProfileDetailsPage>
     return Scaffold(
       appBar: AppBar(
         title: const Text('Business Profile'),
+        actions: [
+          Padding(
+            padding: const EdgeInsets.only(right: 16.0),
+            child: IconButton(
+              icon: const Icon(Icons.warning),
+              onPressed: () {
+                showDialog(
+                  context: context,
+                  builder: (BuildContext context) {
+                    return AlertDialog(
+                      title: const Text(
+                        'Disclaimer',
+                        style: TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 20),
+                      ),
+                      content: const SingleChildScrollView(
+                        child: ListBody(
+                          children: <Widget>[
+                            Text(
+                              'SCT (Seamen\'s Club Tokens) are internal corporate tokens that are planned to be created on the cryptocurrency exchange. Currently, SCT can only be exchanged for NFT images on the Solana or Ethereum blockchain and withdrawn to your cryptocurrency wallet.',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                            SizedBox(height: 10),
+                            Text(
+                              'Initially, you have an NFT image with a power coefficient of 1.0. If needed, you can purchase or exchange earned SCT for a new NFT with a higher power coefficient to increase your earnings when tracking routes or posting feedback.',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                            SizedBox(height: 10),
+                            Text(
+                              'Please read the full information and terms of use before making any investments or exchanges.',
+                              style: TextStyle(fontSize: 16),
+                            ),
+                          ],
+                        ),
+                      ),
+                      actions: <Widget>[
+                        TextButton(
+                          child: const Text('Agree'),
+                          onPressed: () {
+                            Navigator.of(context).pop();
+                          },
+                        ),
+                      ],
+                    );
+                  },
+                );
+              },
+            ),
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -82,11 +132,12 @@ class _BusinessProfileDetailsPageState extends State<BusinessProfileDetailsPage>
                         SizedBox(height: 10),
                         Text(
                           'Alex Karpenko',
-                          style: TextStyle(fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                              fontWeight: FontWeight.bold, fontSize: 18),
                         ),
                         Text(
                           '\$104.8 SCT',
-                          style: TextStyle(color: Colors.grey),
+                          style: TextStyle(color: Colors.grey, fontSize: 16),
                         ),
                       ],
                     ),

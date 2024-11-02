@@ -9,11 +9,15 @@ class BuyNewNFTsScreen extends StatelessWidget {
       appBar: AppBar(
         title: const Text('Buy New NFTs'),
       ),
-      // ignore: prefer_const_constructors
-      body: Center(
-        child: const Text(
-          'NFT Mirco Marketplace',
-          style: TextStyle(fontSize: 20),
+      body: const Center(
+        child: Padding(
+          padding:
+              EdgeInsets.symmetric(horizontal: 16.0), // Обрезка по горизонтали
+          child: Text(
+            'Insufficient funds for purchases. Your account must have at least 100 SCT.',
+            style: TextStyle(fontSize: 20),
+            textAlign: TextAlign.center, // Выравнивание по центру
+          ),
         ),
       ),
     );
