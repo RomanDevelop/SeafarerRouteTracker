@@ -3,11 +3,22 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong.dart';
+import 'dart:io';
+
 import '../application/route_notifier.dart';
 import '../domain/route_model.dart';
 
 class RouteTrackingScreen extends ConsumerWidget {
   const RouteTrackingScreen({super.key});
+
+  Future<bool> _checkNetworkAvailability() async {
+    try {
+      final result = await InternetAddress.lookup('example.com');
+      return result.isNotEmpty && result[0].rawAddress.isNotEmpty;
+    } catch (_) {
+      return false; // Сеть недоступна
+    }
+  }
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -23,76 +34,96 @@ class RouteTrackingScreen extends ConsumerWidget {
           onPressed: () => Navigator.pop(context),
         ),
       ),
-      body: FutureBuilder<Position>(
-        future: ref.read(routeProvider.notifier).getCurrentPosition(),
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
+      body: FutureBuilder<bool>(
+        future: _checkNetworkAvailability(),
+        builder: (context, networkSnapshot) {
+          if (networkSnapshot.connectionState == ConnectionState.waiting) {
             return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
           }
 
-          final currentPosition = snapshot.data;
+          final isNetworkAvailable = networkSnapshot.data ?? false;
 
-          return Stack(
-            children: [
-              FlutterMap(
-                options: MapOptions(
-                  crs: const Epsg3857(),
-                  initialCenter: currentPosition != null
-                      ? LatLng(
-                          currentPosition.latitude, currentPosition.longitude)
-                      : const LatLng(50.5, 30.51),
-                  initialZoom: routeState.zoomLevel,
-                  interactionOptions: const InteractionOptions(
-                    flags: InteractiveFlag.all,
-                  ),
-                ),
+          return FutureBuilder<Position>(
+            future: ref.read(routeProvider.notifier).getCurrentPosition(),
+            builder: (context, positionSnapshot) {
+              if (positionSnapshot.connectionState == ConnectionState.waiting) {
+                return const Center(child: CircularProgressIndicator());
+              } else if (positionSnapshot.hasError) {
+                return Center(child: Text('Error: ${positionSnapshot.error}'));
+              }
+
+              final currentPosition = positionSnapshot.data;
+
+              return Stack(
                 children: [
-                  TileLayer(
-                    urlTemplate:
-                        "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                  // Если сеть недоступна, отображаем error_map.png вместо карты
+                  if (!isNetworkAvailable)
+                    Center(
+                      child: Image.asset(
+                        'assets/error_map.png',
+                        fit: BoxFit.cover,
+                      ),
+                    )
+                  else
+                    FlutterMap(
+                      options: MapOptions(
+                        crs: const Epsg3857(),
+                        initialCenter: currentPosition != null
+                            ? LatLng(currentPosition.latitude,
+                                currentPosition.longitude)
+                            : const LatLng(50.5, 30.51),
+                        initialZoom: routeState.zoomLevel,
+                        interactionOptions: const InteractionOptions(
+                          flags: InteractiveFlag.all,
+                        ),
+                      ),
+                      children: [
+                        TileLayer(
+                          urlTemplate:
+                              "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
+                        ),
+                        MarkerLayer(markers: _createMarkers(routeState)),
+                        PolylineLayer(polylines: _createPolylines(routeState)),
+                      ],
+                    ),
+                  Positioned(
+                    bottom: 0,
+                    left: 0,
+                    right: 0,
+                    child: _buildDistanceInfo(context, ref, routeState),
                   ),
-                  MarkerLayer(markers: _createMarkers(routeState)),
-                  PolylineLayer(polylines: _createPolylines(routeState)),
+                  // Кнопки для зума
+                  Positioned(
+                    top: 100,
+                    right: 10,
+                    child: Column(
+                      children: [
+                        FloatingActionButton(
+                          heroTag: "zoomIn",
+                          onPressed: () {
+                            ref.read(routeProvider.notifier).zoomIn();
+                          },
+                          child: const Icon(Icons.zoom_in),
+                        ),
+                        const SizedBox(height: 10),
+                        FloatingActionButton(
+                          heroTag: "zoomOut",
+                          onPressed: () {
+                            ref.read(routeProvider.notifier).zoomOut();
+                          },
+                          child: const Icon(Icons.zoom_out),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Center(
+                    child: routeState.start != null && routeState.end == null
+                        ? _buildInProgressRoute()
+                        : _buildStartRouteButton(context, ref),
+                  ),
                 ],
-              ),
-              Positioned(
-                bottom: 0,
-                left: 0,
-                right: 0,
-                child: _buildDistanceInfo(context, ref, routeState),
-              ),
-              // Кнопки для зума
-              Positioned(
-                top: 100,
-                right: 10,
-                child: Column(
-                  children: [
-                    FloatingActionButton(
-                      heroTag: "zoomIn",
-                      onPressed: () {
-                        ref.read(routeProvider.notifier).zoomIn();
-                      },
-                      child: const Icon(Icons.zoom_in),
-                    ),
-                    const SizedBox(height: 10),
-                    FloatingActionButton(
-                      heroTag: "zoomOut",
-                      onPressed: () {
-                        ref.read(routeProvider.notifier).zoomOut();
-                      },
-                      child: const Icon(Icons.zoom_out),
-                    ),
-                  ],
-                ),
-              ),
-              Center(
-                child: routeState.start != null && routeState.end == null
-                    ? _buildInProgressRoute()
-                    : _buildStartRouteButton(context, ref),
-              ),
-            ],
+              );
+            },
           );
         },
       ),
@@ -156,8 +187,8 @@ class RouteTrackingScreen extends ConsumerWidget {
         children: [
           const SizedBox(height: 20),
           Text(
-            'Distance Traveled: ${routeState.distance.toStringAsFixed(2)} km\n'
-            'Tokens Earned: $tokensEarned SCT',
+            'Distance Traveled: ${routeState.distance.toStringAsFixed(2)} NM\n'
+            'Tokens Earned: $tokensEarned SCAI',
             style: const TextStyle(
                 fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
           ),
@@ -166,11 +197,31 @@ class RouteTrackingScreen extends ConsumerWidget {
             onPressed: () async {
               await ref.read(routeProvider.notifier).endRoute();
               showDialog(
-                // ignore: use_build_context_synchronously
                 context: context,
                 builder: (BuildContext context) {
                   return AlertDialog(
-                    content: const Text('Route ended'),
+                    title: const Text(
+                      'Route Ended',
+                      style: TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                    content: const SingleChildScrollView(
+                      child: ListBody(
+                        children: <Widget>[
+                          Text(
+                            'Route ended. Please note:',
+                            style: TextStyle(fontSize: 16),
+                          ),
+                          SizedBox(height: 10),
+                          Text(
+                            'After the Verification of your Ship position and Confirmation of the distance covered by our tech Manager,'
+                            'You will receive the earned SCAI tokens in your account (within 48 hours)',
+                            style: TextStyle(
+                                fontSize: 16,
+                                color: Color.fromARGB(255, 33, 143, 36)),
+                          ),
+                        ],
+                      ),
+                    ),
                     actions: <Widget>[
                       TextButton(
                         child: const Text('OK'),
@@ -218,7 +269,6 @@ class RouteTrackingScreen extends ConsumerWidget {
       permission = await Geolocator.requestPermission();
       if (permission == LocationPermission.denied) {
         showDialog(
-          // ignore: use_build_context_synchronously
           context: context,
           builder: (BuildContext context) {
             return AlertDialog(
@@ -240,7 +290,6 @@ class RouteTrackingScreen extends ConsumerWidget {
 
     if (permission == LocationPermission.deniedForever) {
       showDialog(
-        // ignore: use_build_context_synchronously
         context: context,
         builder: (BuildContext context) {
           return AlertDialog(
@@ -263,11 +312,29 @@ class RouteTrackingScreen extends ConsumerWidget {
 
     await ref.read(routeProvider.notifier).startRoute();
     showDialog(
-      // ignore: use_build_context_synchronously
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          content: const Text('Route started'),
+          title: const Text(
+            'Route Started',
+            style: TextStyle(fontWeight: FontWeight.bold),
+          ),
+          content: const SingleChildScrollView(
+            child: ListBody(
+              children: <Widget>[
+                Text(
+                  'Route started. Please note:',
+                  style: TextStyle(fontSize: 16),
+                ),
+                SizedBox(height: 10),
+                Text(
+                  'Using VPN during route tracking is strictly prohibited. '
+                  'If a VPN is detected while tracking your location, any accumulated SCAI tokens for this route may be annulled.',
+                  style: TextStyle(fontSize: 16, color: Colors.redAccent),
+                ),
+              ],
+            ),
+          ),
           actions: <Widget>[
             TextButton(
               child: const Text('OK'),

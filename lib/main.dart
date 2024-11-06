@@ -14,10 +14,10 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     // Пример данных для BusinessProfile
     BusinessProfile profile = BusinessProfile(
-      balance: 9.99,
-      nftShipName: 'NFT UHL FLAIR',
+      balance: 9.9,
+      nftShipName: 'CURRENT NFT',
       nftShipUrl:
-          'https://images.unsplash.com/photo-1474224348275-dd142b14f8c1?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NTh8fHNoaXB8ZW58MHx8MHx8fDA%3D',
+          'https://images.unsplash.com/photo-1605999358548-c8593e96cb83?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTc0fHxwaXJhdGUlMjBzaGlwfGVufDB8fDB8fHww',
       coefficientPower: 1.0,
       nauticalMile: 0.0,
     );

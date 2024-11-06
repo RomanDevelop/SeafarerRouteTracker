@@ -33,6 +33,12 @@ class BusinessProfileCard extends StatelessWidget {
             Image.network(
               profile.nftShipUrl,
               height: 120,
+              errorBuilder: (context, error, stackTrace) {
+                return Image.asset(
+                  'assets/ship_nft.png', // Путь к локальному изображению
+                  height: 120,
+                );
+              },
             ),
             Text(
               profile.nftShipName,
@@ -49,11 +55,8 @@ class BusinessProfileCard extends StatelessWidget {
               children: [
                 Row(
                   children: [
-                    const Icon(
-                      Icons.monetization_on,
-                      color: Colors.grey,
-                    ),
-                    Text(' ${profile.balance.toStringAsFixed(2)} SCT'),
+                    const Icon(Icons.currency_bitcoin),
+                    Text(' ${profile.balance.toStringAsFixed(2)} SCAI'),
                   ],
                 ),
                 Row(

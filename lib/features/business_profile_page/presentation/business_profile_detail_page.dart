@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:route_tracking/features/business_profile_page/presentation/more_card.dart';
 import 'package:route_tracking/features/business_profile_page/presentation/business_profile_card.dart';
 import 'package:route_tracking/features/business_profile_page/presentation/ship_model.dart';
+import 'package:route_tracking/features/business_profile_page/presentation/tokenomics_screen.dart';
 import 'package:route_tracking/features/route_tracking/presentation/route_tracking_screen.dart';
 
 class BusinessProfileDetailsPage extends StatefulWidget {
@@ -48,47 +49,11 @@ class _BusinessProfileDetailsPageState extends State<BusinessProfileDetailsPage>
           Padding(
             padding: const EdgeInsets.only(right: 16.0),
             child: IconButton(
-              icon: const Icon(Icons.warning),
+              icon: const Icon(Icons.currency_bitcoin),
               onPressed: () {
-                showDialog(
-                  context: context,
-                  builder: (BuildContext context) {
-                    return AlertDialog(
-                      title: const Text(
-                        'Disclaimer',
-                        style: TextStyle(
-                            fontWeight: FontWeight.bold, fontSize: 20),
-                      ),
-                      content: const SingleChildScrollView(
-                        child: ListBody(
-                          children: <Widget>[
-                            Text(
-                              'SCT (Seamen\'s Club Tokens) are internal corporate tokens that are planned to be created on the cryptocurrency exchange. Currently, SCT can only be exchanged for NFT images on the Solana or Ethereum blockchain and withdrawn to your cryptocurrency wallet.',
-                              style: TextStyle(fontSize: 16),
-                            ),
-                            SizedBox(height: 10),
-                            Text(
-                              'Initially, you have an NFT image with a power coefficient of 1.0. If needed, you can purchase or exchange earned SCT for a new NFT with a higher power coefficient to increase your earnings when tracking routes or posting feedback.',
-                              style: TextStyle(fontSize: 16),
-                            ),
-                            SizedBox(height: 10),
-                            Text(
-                              'Please read the full information and terms of use before making any investments or exchanges.',
-                              style: TextStyle(fontSize: 16),
-                            ),
-                          ],
-                        ),
-                      ),
-                      actions: <Widget>[
-                        TextButton(
-                          child: const Text('Agree'),
-                          onPressed: () {
-                            Navigator.of(context).pop();
-                          },
-                        ),
-                      ],
-                    );
-                  },
+                Navigator.of(context).push(
+                  MaterialPageRoute(
+                      builder: (context) => const TokenomicsScreen()),
                 );
               },
             ),
@@ -104,7 +69,7 @@ class _BusinessProfileDetailsPageState extends State<BusinessProfileDetailsPage>
                   nftShipUrl: widget.profile.nftShipUrl,
                   coefficientPower: widget.profile.coefficientPower,
                   nauticalMile: widget.profile.nauticalMile)),
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 20),
             child: Row(
@@ -133,11 +98,21 @@ class _BusinessProfileDetailsPageState extends State<BusinessProfileDetailsPage>
                         Text(
                           'Alex Karpenko',
                           style: TextStyle(
-                              fontWeight: FontWeight.bold, fontSize: 18),
+                              fontWeight: FontWeight.bold, fontSize: 16),
                         ),
-                        Text(
-                          '\$104.8 SCT',
-                          style: TextStyle(color: Colors.grey, fontSize: 16),
+                        Row(
+                          children: [
+                            Icon(
+                              Icons.account_balance_wallet,
+                              size: 16,
+                            ),
+                            Text(
+                              ' 9.90 SCAI',
+                              style: TextStyle(
+                                color: Colors.grey,
+                              ),
+                            ),
+                          ],
                         ),
                       ],
                     ),
@@ -189,17 +164,17 @@ class _BusinessProfileDetailsPageState extends State<BusinessProfileDetailsPage>
               children: [
                 MoreCard(
                   title: 'Create Post — Earn Tokens',
-                  tokenAmount: '21.5 SCT',
+                  tokenAmount: '21.5 SCAI',
                 ),
                 SizedBox(height: 5),
                 MoreCard(
                   title: 'Company Feedback for Tokens',
-                  tokenAmount: '55.2 SCT',
+                  tokenAmount: '55.2 SCAI',
                 ),
                 SizedBox(height: 5),
                 MoreCard(
                   title: 'Tokens for Shoreline Adventures',
-                  tokenAmount: '34.7 SCT',
+                  tokenAmount: '34.7 SCAI',
                 ),
               ],
             ),

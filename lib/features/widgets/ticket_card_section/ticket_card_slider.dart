@@ -44,8 +44,9 @@ class TicketCardSlider extends StatelessWidget {
                         borderRadius: const BorderRadius.vertical(
                           top: Radius.circular(20),
                         ),
-                        child: Image.network(
-                          imageUrls[index],
+                        child: Image.asset(
+                          // Заменили Image.network на Image.asset
+                          imageUrls[index], // Путь к локальному изображению
                           height: 120,
                           width: double.infinity,
                           fit: BoxFit.cover,

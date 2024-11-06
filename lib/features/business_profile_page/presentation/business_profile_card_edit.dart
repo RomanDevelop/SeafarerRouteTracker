@@ -41,9 +41,9 @@ class BusinessProfileCardEdit extends StatelessWidget {
               height: 200,
               child: TicketCardSlider(
                 imageUrls: [
-                  'https://images.unsplash.com/photo-1523294002435-91467ed2ccda?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MTR8fHNoaXB8ZW58MHx8MHx8fDA%3D',
-                  'https://plus.unsplash.com/premium_photo-1661884720911-91cd3f823298?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MzN8fHNoaXB8ZW58MHx8MHx8fDA%3D',
-                  'https://images.unsplash.com/photo-1444487233259-dae9d907a740?w=900&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8MzZ8fHNoaXB8ZW58MHx8MHx8fDA%3D',
+                  'assets/ship_nft_1.png', // Локальный путь к изображению
+                  'assets/ship_nft_2.png',
+                  'assets/ship_nft_3.png',
                 ],
               ),
             ),
@@ -59,7 +59,7 @@ class BusinessProfileCardEdit extends StatelessWidget {
               },
               child: const MoreCard(
                 title: 'Buy New NFTs',
-                tokenAmount: '3.0 SCT',
+                tokenAmount: '3.0 SCAI',
               ),
             ),
             const SizedBox(height: 10),
@@ -74,7 +74,7 @@ class BusinessProfileCardEdit extends StatelessWidget {
               },
               child: const MoreCard(
                 title: 'Sell Your NFTs',
-                tokenAmount: '5.0 SCT',
+                tokenAmount: '5.0 SCAI',
               ),
             ),
             const SizedBox(height: 10),
@@ -89,7 +89,7 @@ class BusinessProfileCardEdit extends StatelessWidget {
               },
               child: const MoreCard(
                 title: 'Exchange & Withdrawals',
-                tokenAmount: '100.0 SCT',
+                tokenAmount: '100.0 SCAI',
               ),
             ),
           ],
